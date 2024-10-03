@@ -2,7 +2,11 @@ import subprocess
 import time
 import os
 from weights_manifest import WeightsManifest
+from config import config
+import requests
+from tqdm import tqdm
 
+MODELS_PATH = config["MODELS_PATH"]
 
 class WeightsDownloader:
     supported_filetypes = [
@@ -42,10 +46,10 @@ class WeightsDownloader:
                     self.weights_map[weight_str]["url"],
                     self.weights_map[weight_str]["dest"],
                 )
-        else:
-            raise ValueError(
-                f"{weight_str} unavailable. View the list of available weights: https://github.com/fofr/cog-comfyui/blob/main/supported_weights.md"
-            )
+        # else:
+        #     raise ValueError(
+        #         f"{weight_str} unavailable. View the list of available weights: https://github.com/fofr/cog-comfyui/blob/main/supported_weights.md"
+        #     )
 
     def check_if_file_exists(self, weight_str, dest):
         if dest.endswith(weight_str):
@@ -59,6 +63,7 @@ class WeightsDownloader:
             print(f"✅ {weight_str} exists in {dest}")
             return
         WeightsDownloader.download(weight_str, url, dest)
+    
 
     @staticmethod
     def download(weight_str, url, dest):
@@ -83,3 +88,44 @@ class WeightsDownloader:
             )
         except FileNotFoundError:
             print(f"✅ {weight_str} downloaded to {dest} in {elapsed_time:.2f}s")
+        
+    def handle_civitai_download(self, model):
+        url = model['url'] + f"&token={config['CIVITAI_API_TOKEN']}"
+        dest_folder = os.path.join(MODELS_PATH, model['dest'])
+        os.makedirs(dest_folder, exist_ok=True)
+
+        head_response = requests.head(url, allow_redirects=True)
+        if 'Content-Disposition' in head_response.headers:
+            content_disposition = head_response.headers['Content-Disposition']
+            filename = content_disposition.split('filename=')[1].strip('"')
+        else:
+            # Fallback to the name provided in weight_info if header is not available
+            filename = model['name']
+        
+        dest_path = os.path.join(dest_folder, filename)
+
+        # check if exists locally
+        if os.path.exists(dest_path):
+            print(f"✅ {filename} exists in {dest_folder}")
+            return
+        
+        # if not, download
+        print(f"⏳ Downloading {filename} to {dest_folder}")
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+
+        total_size = int(response.headers.get('content-length', 0))
+        block_size = 8192  # 8 KB
+
+        with open(dest_path, 'wb') as file, tqdm(
+            desc=filename,
+            total=total_size,
+            unit='iB',
+            unit_scale=True,
+            unit_divisor=1024,
+        ) as progress_bar:
+            for data in response.iter_content(block_size):
+                size = file.write(data)
+                progress_bar.update(size)
+
+        print(f"✅ {filename} downloaded to {dest_folder}")
