@@ -1,25 +1,12 @@
 {
-    "6": {
-      "inputs": {
-        "text": "Photo of a cute woman, in kitchen cooking turkey, looking at viewer, left hand fixing her beatuiful hair. A artistic picture with the word \"FLUX\" on the wall behind the woman.",
-        "clip": [
-          "11",
-          0
-        ]
-      },
-      "class_type": "CLIPTextEncode",
-      "_meta": {
-        "title": "CLIP Text Encode (Positive Prompt)"
-      }
-    },
-    "8": {
+    "702": {
       "inputs": {
         "samples": [
-          "13",
+          "740",
           0
         ],
         "vae": [
-          "10",
+          "736",
           0
         ]
       },
@@ -28,11 +15,11 @@
         "title": "VAE Decode"
       }
     },
-    "9": {
+    "719": {
       "inputs": {
-        "filename_prefix": "ComfyUI",
+        "filename_prefix": "STOIQO\\Previews\\FLUX[time(%Y%m%d)]",
         "images": [
-          "8",
+          "702",
           0
         ]
       },
@@ -41,7 +28,33 @@
         "title": "Save Image"
       }
     },
-    "10": {
+    "723": {
+      "inputs": {
+        "text": "A kodachrome portrait of a young woman, captured in a minimalist setting. She is wearing a shiny, white, form-fitting bodysuit that accentuates her form. Her hair is styled in loose waves, cascading down her shoulders. The woman's gaze is direct and intense, with a neutral expression. The background is blurred, emphasizing the subject, and is predominantly white, which contrasts with the subject's attire. The overall style of the image is contemporary and minimalist, focusing on the subject and her attire.\n",
+        "clip": [
+          "752",
+          1
+        ]
+      },
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "CLIP Text Encode (Prompt)"
+      }
+    },
+    "731": {
+      "inputs": {
+        "guidance": 2.5,
+        "conditioning": [
+          "723",
+          0
+        ]
+      },
+      "class_type": "FluxGuidance",
+      "_meta": {
+        "title": "FluxGuidance"
+      }
+    },
+    "736": {
       "inputs": {
         "vae_name": "ae.safetensors"
       },
@@ -50,7 +63,7 @@
         "title": "Load VAE"
       }
     },
-    "11": {
+    "737": {
       "inputs": {
         "clip_name1": "t5xxl_fp16.safetensors",
         "clip_name2": "clip_l.safetensors",
@@ -61,37 +74,37 @@
         "title": "DualCLIPLoader"
       }
     },
-    "12": {
+    "738": {
       "inputs": {
-        "unet_name": "flux1-dev.safetensors",
-        "weight_dtype": "default"
+        "unet_name": "STOIQONewrealityFLUXSD_F1DAlpha.safetensors",
+        "weight_dtype": "fp8_e4m3fn"
       },
       "class_type": "UNETLoader",
       "_meta": {
         "title": "Load Diffusion Model"
       }
     },
-    "13": {
+    "740": {
       "inputs": {
         "noise": [
-          "25",
+          "744",
           0
         ],
         "guider": [
-          "22",
+          "743",
           0
         ],
         "sampler": [
-          "16",
+          "741",
           0
         ],
         "sigmas": [
-          "17",
+          "742",
           0
         ],
         "latent_image": [
-          "27",
-          0
+          "747",
+          5
         ]
       },
       "class_type": "SamplerCustomAdvanced",
@@ -99,7 +112,7 @@
         "title": "SamplerCustomAdvanced"
       }
     },
-    "16": {
+    "741": {
       "inputs": {
         "sampler_name": "euler"
       },
@@ -108,13 +121,13 @@
         "title": "KSamplerSelect"
       }
     },
-    "17": {
+    "742": {
       "inputs": {
-        "scheduler": "simple",
-        "steps": 20,
+        "scheduler": "beta",
+        "steps": 25,
         "denoise": 1,
         "model": [
-          "30",
+          "752",
           0
         ]
       },
@@ -123,14 +136,14 @@
         "title": "BasicScheduler"
       }
     },
-    "22": {
+    "743": {
       "inputs": {
         "model": [
-          "30",
+          "752",
           0
         ],
         "conditioning": [
-          "26",
+          "731",
           0
         ]
       },
@@ -139,53 +152,68 @@
         "title": "BasicGuider"
       }
     },
-    "25": {
+    "744": {
       "inputs": {
-        "noise_seed": 1096535394325538
+        "noise_seed": 845155723427617
       },
       "class_type": "RandomNoise",
       "_meta": {
         "title": "RandomNoise"
       }
     },
-    "26": {
+    "747": {
       "inputs": {
-        "guidance": 3.5,
-        "conditioning": [
-          "6",
-          0
-        ]
-      },
-      "class_type": "FluxGuidance",
-      "_meta": {
-        "title": "FluxGuidance"
-      }
-    },
-    "27": {
-      "inputs": {
-        "width": 1216,
-        "height": 832,
+        "width": 1024,
+        "height": 1024,
+        "aspect_ratio": "custom",
+        "swap_dimensions": "Off",
+        "upscale_factor": 1,
+        "prescale_factor": 1,
         "batch_size": 1
       },
-      "class_type": "EmptySD3LatentImage",
+      "class_type": "CR Aspect Ratio",
       "_meta": {
-        "title": "EmptySD3LatentImage"
+        "title": "🔳 CR Aspect Ratio"
       }
     },
-    "30": {
+    "751": {
       "inputs": {
-        "max_shift": 1.15,
-        "base_shift": 0.5,
-        "width": 1216,
-        "height": 832,
+        "switch_1": "Off",
+        "lora_name_1": "None",
+        "model_weight_1": 1,
+        "clip_weight_1": 1,
+        "switch_2": "Off",
+        "lora_name_2": "None",
+        "model_weight_2": 1,
+        "clip_weight_2": 1,
+        "switch_3": "Off",
+        "lora_name_3": "None",
+        "model_weight_3": 1,
+        "clip_weight_3": 1
+      },
+      "class_type": "CR LoRA Stack",
+      "_meta": {
+        "title": "💊 CR LoRA Stack"
+      }
+    },
+    "752": {
+      "inputs": {
         "model": [
-          "12",
+          "738",
+          0
+        ],
+        "clip": [
+          "737",
+          0
+        ],
+        "lora_stack": [
+          "751",
           0
         ]
       },
-      "class_type": "ModelSamplingFlux",
+      "class_type": "CR Apply LoRA Stack",
       "_meta": {
-        "title": "ModelSamplingFlux"
+        "title": "💊 CR Apply LoRA Stack"
       }
     }
   }

@@ -16,6 +16,20 @@ INPUT_DIR = "/tmp/inputs"
 COMFYUI_TEMP_OUTPUT_DIR = "ComfyUI/temp"
 ALL_DIRECTORIES = [OUTPUT_DIR, INPUT_DIR, COMFYUI_TEMP_OUTPUT_DIR]
 
+ASPECT_RATIOS = {
+    "1:1": (1024, 1024),
+    "16:9": (1344, 768),
+    "21:9": (1536, 640),
+    "3:2": (1216, 832),
+    "2:3": (832, 1216),
+    "4:5": (896, 1088),
+    "5:4": (1088, 896),
+    "3:4": (896, 1152),
+    "4:3": (1152, 896),
+    "9:16": (768, 1344),
+    "9:21": (640, 1536),
+}
+
 mimetypes.add_type("image/webp", ".webp")
 
 # Save your example JSON to the same directory as predict.py
@@ -59,15 +73,32 @@ class Predictor(BasePredictor):
     def update_workflow(self, workflow, **kwargs):
         # Below is an example showing how to get the node you need and update the inputs
 
+        # this is for basic test wf
         # positive_prompt = workflow["6"]["inputs"]
         # positive_prompt["text"] = kwargs["prompt"]
 
-        # negative_prompt = workflow["7"]["inputs"]
-        # negative_prompt["text"] = f"nsfw, {kwargs['negative_prompt']}"
+        # seed = workflow["25"]["inputs"]
+        # seed["noise_seed"] = kwargs["seed"]
 
-        # sampler = workflow["3"]["inputs"]
-        # sampler["seed"] = kwargs["seed"]
-        pass
+        # this is for stoiq with lora stack
+        workflow["723"]["inputs"]["text"] = kwargs["prompt"]
+        workflow["744"]["inputs"]["noise_seed"] = kwargs["seed"]
+        # workflow["719"]["inputs"]["filename_prefix"] = kwargs["filename_prefix"] # TODO
+        workflow["747"]["inputs"]["width"] = ASPECT_RATIOS[kwargs["aspect_ratio"]][0]
+        workflow["747"]["inputs"]["height"] = ASPECT_RATIOS[kwargs["aspect_ratio"]][1]
+
+        # for input lora
+        if kwargs['lora_filename']:
+            workflow["751"]['inputs']['switch_1'] = 'On'
+            workflow["751"]['inputs']['lora_name_1'] = kwargs['lora_filename']
+            workflow["751"]['inputs']['model_weight_1'] = kwargs['lora_strength']
+        
+        # add custom loras
+        workflow["751"]['inputs']['switch_2'] = 'On'
+        workflow["751"]['inputs']['lora_name_2'] = "bustyFC-2.1.safetensors"
+        workflow["751"]['inputs']['model_weight_2'] = 0
+
+
 
     def predict(
         self,
@@ -81,6 +112,11 @@ class Predictor(BasePredictor):
         image: Path = Input(
             description="An input image",
             default=None,
+        ),
+        aspect_ratio: str = Input(
+            description="Aspect ratio for the generated image",
+            choices=list(ASPECT_RATIOS.keys()),
+            default="1:1"
         ),
         output_format: str = optimise_images.predict_output_format(),
         output_quality: int = optimise_images.predict_output_quality(),
@@ -122,6 +158,7 @@ class Predictor(BasePredictor):
             seed=seed,
             lora_filename=lora_filename,
             lora_strength=lora_strength,
+            aspect_ratio=aspect_ratio,
         )
 
         wf = self.comfyUI.load_workflow(workflow)
